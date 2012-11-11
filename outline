@@ -1,0 +1,398 @@
+=== What's in a Proof? ===
+
+Theorem two_and_two_make_four: 2 + 2 = 4.
+
+Proof.
+  trivial.
+Qed.
+
+---
+
+What's Coq?
+`trivial.` = `auto 1.`
+
+---
+
+auto n =
+  if n == 0
+    failure
+  try assumption.
+  for tautology in hypotheses U hints:
+    try apply tautology. (* including `apply eq_refl.` == `reflexivity.` *)
+    (* produces subgoals *)
+    for each subgoal:
+      call `auto (n - 1)` on subgoal
+    if all subgoals are solved
+      success
+
+---
+
+assumption =
+  tries to match the current goal exactly against all current hypotheses
+
+---
+
+apply term =
+  tries to match the current goal against the conclusion of the type of term
+  Success: returns subgoals = non-dependent premises of term's type
+  The tactic apply relies on first-order unification with dependent types
+
+---
+
+Coq < Theorem two_and_two_make_four: 2 + 2 = 4.
+1 subgoal
+
+  ============================
+   2 + 2 = 4
+
+two_and_two_make_four < Proof.
+
+two_and_two_make_four < Print Hint.
+Applicable Hints :
+In the database bool:
+  apply andb_true_intro(1)
+In the database core:
+  apply mult_n_O(0)
+  apply mult_n_Sm(0)
+  apply plus_n_O(0)
+  apply eq_refl(0)
+  apply plus_n_Sm(0)
+  apply eq_add_S ; trivial(1)
+  apply eq_sym ; trivial(1)
+  apply f_equal (A:=nat)(1)
+  apply f_equal2 mult(2)
+  apply f_equal2 (A1:=nat) (A2:=nat)(2)
+In the database eq_true: nothing
+In the database extcore: nothing
+In the database typeclass_instances: nothing
+In the database v62:
+  apply f_equal pred(1)
+  apply f_equal S(1)
+  apply f_equal2 plus(2)
+
+---
+
+two_and_two_make_four < info trivial.
+ == apply eq_refl.
+
+Proof completed.
+
+two_and_two_make_four < Qed.
+info trivial.
+
+two_and_two_make_four is defined
+
+---
+
+Then, we find equality, defined as an inductive relation. That is, given a type
+A and an x of type A, the predicate (eq A x) is the smallest one which contains
+x. This definition, due to Christine Paulin-Mohring, is equivalent to define eq
+as the smallest reflexive relation, and it is also equivalent to Leibniz’
+equality.
+
+Coq < Inductive eq (A:Type) (x:A) : A -> Prop :=
+Coq <     eq_refl : eq A x x.
+
+How the hell does that help?
+
+---
+
+Coq < Set Printing All.
+
+Coq < Print two_and_two_make_four.
+two_and_two_make_four =
+@eq_refl nat (S (S (S (S O))))
+     : @eq nat (plus (S (S O)) (S (S O)))
+               (S (S (S (S O))))
+
+[I'm not sure what's with the @-signs]
+
+---
+
+Inductive nat : Set :=
+  | O : nat
+  | S : nat -> nat.
+
+The clauses of this definition can be read:
+    * O is a natural number (note that this is the letter "O," not the numeral
+      "0").
+    * S is a "constructor" that takes a natural number and yields another one —
+      that is, if n is a natural number, then S n is too.
+
+Let's look at this in a little more detail.  Every inductively defined set
+(weekday, nat, bool, etc.) is actually a set of expressions. The definition of
+nat says how expressions in the set nat can be constructed:
+    * the expression O belongs to the set nat;
+    * if n is an expression belonging to the set nat, then S n is also an
+      expression belonging to the set nat; and
+    * expressions formed in these two ways are the only ones belonging to the
+      set nat.
+
+These three conditions are the precise force of the Inductive declaration. They
+imply that the expression O, the expression S O, the expression S (S O), the
+expression S (S (S O)), and so on all belong to the set nat, while other
+expressions like true, andb true false, and S (S false) do not. 
+
+---
+
+Fixpoint plus (n m:nat) : nat :=
+  match n with
+  | O => m
+  | S p => S (p + m)
+  end
+
+where "n + m" := (plus n m) : nat_scope.
+
+---
+
+Calculus of Inductive Constructions < Calculus of Constructions (CoC ~> Coq)
+http://flint.cs.yale.edu/cs430/coq/doc/Reference-Manual006.html
+
+beta-reduction.
+We want to be able to identify some terms as we can identify the application of
+a function to a given argument with its result. For instance the identity
+function over a given type T can be written lambda x:T, x. In any environment E
+and context Gamma, we want to identify any object a (of type T) with the
+application ((lambda x:T, x) a). We define for this a reduction (or a
+conversion) rule we call beta:
+  E[Gamma] |- ((lambda x:T, t) u) |>beta t{x/u}
+We say that t{x/u} is the beta-contraction of ((lambda x:T, t) u) and,
+conversely, that ((lambda x:T, t) u) is the beta-expansion of t{x/u}.
+
+According to beta-reduction, terms of the Calculus of Inductive Constructions
+enjoy some fundamental properties such as confluence, strong normalization,
+subject reduction. These results are theoretically of great importance but we
+will not detail them here and refer the interested reader to [21].
+
+iota-reduction.
+A specific conversion rule is associated to the inductive objects in the
+environment. We shall give later on (section 4.5.4) the precise rules but it
+just says that a destructor applied to an object built from a constructor
+behaves as expected. This reduction is called iota-reduction and is more
+precisely studied in [103, 117].
+
+delta-reduction.
+We may have defined variables in contexts or constants in the global
+environment. It is legal to identify such a reference with its value, that is
+to expand (or unfold) it into its value. This reduction is called
+delta-reduction and shows as follows.
+  E[Gamma] |- x |>delta t     if (x:=t:T)inGamma         E[Gamma] |- c |>delta t     if (c:=t:T)in E
+
+zeta-reduction.
+Coq allows also to remove local definitions occurring in terms by replacing the
+defined variable by its value. The declaration being destroyed, this reduction
+differs from delta-reduction. It is called zeta-reduction and shows as follows.
+  E[Gamma] |- let x:=u in t |>zeta t{x/u}
+
+---
+
+Coq < Theorem there_are_four_lights: 2 + 2 = 4.
+1 subgoal
+
+  ============================
+   @eq nat (plus (S (S O)) (S (S O))) (S (S (S (S O))))
+
+there_are_four_lights < cbv delta.
+1 subgoal
+
+  ============================
+   @eq nat
+     ((fix plus (n m : nat) : nat :=
+         match n return nat with
+         | O => m
+         | S p => S (plus p m)
+         end) (S (S O)) (S (S O))) (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat
+     ((fun n m : nat =>
+       match n return nat with
+       | O => m
+       | S p =>
+           S
+             ((fix plus (n0 m0 : nat) : nat :=
+                 match n0 return nat with
+                 | O => m0
+                 | S p0 => S (plus p0 m0)
+                 end) p m)
+       end) (S (S O)) (S (S O))) (S (S (S (S O))))
+
+there_are_four_lights < cbv beta.
+1 subgoal
+
+  ============================
+   @eq nat
+     match S (S O) return nat with
+     | O => S (S O)
+     | S p =>
+         S
+           ((fix plus (n m : nat) : nat :=
+               match n return nat with
+               | O => m
+               | S p0 => S (plus p0 m)
+               end) p (S (S O)))
+     end (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat
+     ((fun p : nat =>
+       S
+         ((fix plus (n m : nat) : nat :=
+             match n return nat with
+             | O => m
+             | S p0 => S (plus p0 m)
+             end) p (S (S O)))) (S O)) (S (S (S (S O))))
+
+there_are_four_lights < cbv beta.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        ((fix plus (n m : nat) : nat :=
+            match n return nat with
+            | O => m
+            | S p => S (plus p m)
+            end) (S O) (S (S O)))) (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        ((fun n m : nat =>
+          match n return nat with
+          | O => m
+          | S p =>
+              S
+                ((fix plus (n0 m0 : nat) : nat :=
+                    match n0 return nat with
+                    | O => m0
+                    | S p0 => S (plus p0 m0)
+                    end) p m)
+          end) (S O) (S (S O)))) (S (S (S (S O))))
+
+there_are_four_lights < cbv beta.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        match S O return nat with
+        | O => S (S O)
+        | S p =>
+            S
+              ((fix plus (n m : nat) : nat :=
+                  match n return nat with
+                  | O => m
+                  | S p0 => S (plus p0 m)
+                  end) p (S (S O)))
+        end) (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        ((fun p : nat =>
+          S
+            ((fix plus (n m : nat) : nat :=
+                match n return nat with
+                | O => m
+                | S p0 => S (plus p0 m)
+                end) p (S (S O)))) O)) (S (S (S (S O))))
+
+there_are_four_lights < cbv beta.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        (S
+           ((fix plus (n m : nat) : nat :=
+               match n return nat with
+               | O => m
+               | S p => S (plus p m)
+               end) O (S (S O))))) (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        (S
+           ((fun n m : nat =>
+             match n return nat with
+             | O => m
+             | S p =>
+                 S
+                   ((fix plus (n0 m0 : nat) : nat :=
+                       match n0 return nat with
+                       | O => m0
+                       | S p0 => S (plus p0 m0)
+                       end) p m)
+             end) O (S (S O))))) (S (S (S (S O))))
+
+there_are_four_lights < cbv beta.
+1 subgoal
+
+  ============================
+   @eq nat
+     (S
+        (S
+           match O return nat with
+           | O => S (S O)
+           | S p =>
+               S
+                 ((fix plus (n m : nat) : nat :=
+                     match n return nat with
+                     | O => m
+                     | S p0 => S (plus p0 m)
+                     end) p (S (S O)))
+           end)) (S (S (S (S O))))
+
+there_are_four_lights < cbv iota.
+1 subgoal
+
+  ============================
+   @eq nat (S (S (S (S O)))) (S (S (S (S O))))
+
+there_are_four_lights < apply eq_refl.
+Proof completed.
+
+there_are_four_lights < Qed.
+cbv delta.
+cbv iota.
+cbv beta.
+cbv iota.
+cbv beta.
+cbv iota.
+cbv beta.
+cbv iota.
+cbv beta.
+cbv iota.
+cbv beta.
+cbv iota.
+apply eq_refl.
+
+there_are_four_lights is defined
+
+---
+
+Curry-Howard Correspondence
+  - Punchline: programs are proofs, from formal semantics to plain ol' Java
+  - Coq can export proofs into programs in other languages
+  - Strong future in automating proofs
+    - Results that humans couldn't achieve (Robbins' conjecture)
+    - Not Coq, though
+    - Hilarious to ask math students about this
+    - End of the day: proof assistants (4-color theorem, Compcert)
