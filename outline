@@ -93,6 +93,67 @@ equality.
 Coq < Inductive eq (A:Type) (x:A) : A -> Prop :=
 Coq <     eq_refl : eq A x x.
 
+(* The following doesn't work, because you're required to use y: *)
+
+Coq < Inductive eq (A:Type) (x:A) (y:A) : Prop :=
+Coq <     eq_refl : eq A x x.
+
+DETAILS:
+
+As a running example for the first part of the chapter, let's consider a simple
+property of natural numbers, and let's say that the numbers possessing this
+property are "beautiful." Informally, a number is beautiful if it is 0, 3, 5,
+or the sum of two beautiful numbers. More pedantically, we can define beautiful
+numbers by giving four rules:
+
+  Rule b_0: The number 0 is beautiful.
+  Rule b_3: The number 3 is beautiful.
+  Rule b_5: The number 5 is beautiful.
+  Rule b_sum: If n and m are both beautiful, then so is their sum.
+
+In Coq, we can express the definition of beautiful as follows:
+
+  Inductive beautiful : nat → Prop :=
+    b_0 : beautiful 0
+  | b_3 : beautiful 3
+  | b_5 : beautiful 5
+  | b_sum : ∀n m, beautiful n → beautiful m → beautiful (n+m).
+
+Look again at the formal definition of the beautiful property. The opening
+keyword, Inductive, has been used up to this point to declare new types of
+data, such as numbers and lists. Does this interpretation also make sense for
+the Inductive definition of beautiful? That is, can we view evidence of beauty
+as some kind of data structure? Yes, we can!
+
+The trick is to introduce an alternative pronunciation of ":". Instead of "has
+type," we can also say "is a proof of." For example, the second line in the
+definition of beautiful declares that b_0 : beautiful 0. Instead of "b_0 has
+type beautiful 0," we can say that "b_0 is a proof of beautiful 0." Similarly
+for b_3 and b_5.
+
+eq x y, or simply x=y expresses the equality of x and y. Both x and y must
+belong to the same type A. The definition is inductive and states the
+reflexivity of the equality. The others properties (symmetry, transitivity,
+replacement of equals by equals) are proved below. The type of x and y can be
+made explicit using the notation x = y :> A. This is Leibniz equality as it
+expresses that x and y are equal iff every property on A which is true of x is
+also true of y
+
+  Inductive eq (A:Type) (x:A) : A -> Prop :=
+      eq_refl : x = x :>A
+
+  where "x = y :> A" := (@eq A x y) : type_scope.
+
+  Notation "x = y" := (x = y :>_) : type_scope.
+
+  (* Wonky-looking stuff that says to infer the argument A. *)
+
+  Arguments eq {A} x _.
+  Arguments eq_refl {A x} , [A] x.
+
+[The @-sign has to do with making implicit arguments explicit for a particular
+function application.]
+
 How the hell does that help?
 
 ---
@@ -104,8 +165,6 @@ two_and_two_make_four =
 @eq_refl nat (S (S (S (S O))))
      : @eq nat (plus (S (S O)) (S (S O)))
                (S (S (S (S O))))
-
-[I'm not sure what's with the @-signs]
 
 ---
 
@@ -131,7 +190,7 @@ nat says how expressions in the set nat can be constructed:
 These three conditions are the precise force of the Inductive declaration. They
 imply that the expression O, the expression S O, the expression S (S O), the
 expression S (S (S O)), and so on all belong to the set nat, while other
-expressions like true, andb true false, and S (S false) do not. 
+expressions like true, andb true false, and S (S false) do not.
 
 ---
 
