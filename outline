@@ -16,11 +16,10 @@ What's Coq?
 auto n =
   if n == 0
     failure
-  try assumption.
-  for tautology in hypotheses U hints:
-    try apply tautology. (* including `apply eq_refl.` == `reflexivity.` *)
-    (* produces subgoals *)
-    for each subgoal:
+  for tactic in hypotheses U hints:
+    (* loosely speaking, hypotheses cover `assumption.` *)
+    try apply tactic. (* including `apply eq_refl.` == `reflexivity.` *)
+    for each subgoal produced:
       call `auto (n - 1)` on subgoal
     if all subgoals are solved
       success
@@ -36,6 +35,34 @@ apply term =
   tries to match the current goal against the conclusion of the type of term
   Success: returns subgoals = non-dependent premises of term's type
   The tactic apply relies on first-order unification with dependent types
+
+Coq < Example ex: (1=2 -> 2=1) -> (2=1 -> 1=2) -> 1=2.
+1 subgoal
+
+  ============================
+   (1 = 2 -> 2 = 1) -> (2 = 1 -> 1 = 2) -> 1 = 2
+
+ex < intros.
+1 subgoal
+
+  H : 1 = 2 -> 2 = 1
+  H0 : 2 = 1 -> 1 = 2
+  ============================
+   1 = 2
+
+ex < apply H.
+Toplevel input, characters 6-7:
+> apply H.
+>       ^
+Error: Impossible to unify "2 = 1" with "1 = 2".
+
+ex < apply H0.
+1 subgoal
+
+  H : 1 = 2 -> 2 = 1
+  H0 : 2 = 1 -> 1 = 2
+  ============================
+   2 = 1
 
 ---
 
