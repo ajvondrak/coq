@@ -159,4 +159,46 @@
   \end{onlyenv}
 \end{frame}
 
+\begin{frame}[fragile]{Hints and Hypotheses}
+  \begin{lstlisting}[gobble=4,escapechar=|]
+    |\gray{Coq <}| Theorem two_and_two_make_four: 2 + 2 = 4.
+    |\gray{1 subgoal}|
+
+      |\gray{============================}|
+       |\gray{2 + 2 = 4}|
+
+    |\gray{two\_and\_two\_make\_four <}| Print Hint.
+  \end{lstlisting}
+  \small
+  \begin{lstlisting}[language={},gobble=4]
+    Applicable Hints :
+    [...]
+    In the database core:
+      apply mult_n_O(0) apply mult_n_Sm(0) apply plus_n_O(0)
+      apply eq_refl(0) apply plus_n_Sm(0)
+      apply eq_add_S ; trivial(1) apply eq_sym ; trivial(1)
+      apply f_equal (A:=nat)(1) apply f_equal2 mult(2)
+      apply f_equal2 (A1:=nat) (A2:=nat)(2)
+    [...]
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Hints and Hypotheses}{Which Hint?}
+  \begin{lstlisting}[gobble=4,escapechar=|]
+    |\gray{two\_and\_two\_make\_four <}| Proof.
+
+    |\gray{two\_and\_two\_make\_four <}| info trivial.
+     |\gray{==}| apply eq_refl.
+
+    |\gray{Proof completed.}|
+
+    |\gray{two\_and\_two\_make\_four}| < Qed.
+    |\gray{info trivial.}|
+
+    |\gray{two\_and\_two\_make\_four is defined}|
+
+    |\gray{Coq <}|
+  \end{lstlisting}
+\end{frame}
+
 \end{document}
