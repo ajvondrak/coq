@@ -9,6 +9,7 @@
   \begin{beamercolorbox}{block title example}#1\end{beamercolorbox}%
 }
 \renewcommand<>{\fbox}[1]{\alt#2{\beameroriginal{\fbox}{#1}}{#1}}
+\newcommand{\gray}[1]{\textcolor{gray}{#1}}
 
 \usepackage{listings,lstlangcoq,bold-extra}
 \lstset{basicstyle=\ttfamily,language=Coq}
@@ -88,6 +89,74 @@
               auto (n - 1) |\normalfont on that subgoal|
     \end{lstlisting}
   \end{block}
+\end{frame}
+
+\begin{frame}[fragile,t]{\texttt{apply} term\texttt{.}}
+  \begin{itemize}
+    \item Tries to \alert{unify} the goal with the conclusion of the
+          \alert{type} of ``term''
+    \item Returns \alert{subgoals}---premises of the type of ``term''
+  \end{itemize}
+  \begin{onlyenv}<1>
+    \begin{example}[At the Coq Top-Level]
+      \begin{lstlisting}[gobble=8,escapechar=|]
+        |\gray{Coq <}| Example ex: (1=2 -> 2=1) -> (2=1 -> 1=2) -> 1=2.
+        |\gray{1 subgoal}|
+
+          |\gray{============================}|
+           |\gray{(1 = 2 -> 2 = 1) -> (2 = 1 -> 1 = 2) -> 1 = 2}|
+
+        |\gray{ex <}|
+      \end{lstlisting}
+    \end{example}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{example}[At the Coq Top-Level]
+      \begin{lstlisting}[gobble=8,escapechar=|]
+          |\gray{============================}|
+           |\gray{(1 = 2 -> 2 = 1) -> (2 = 1 -> 1 = 2) -> 1 = 2}|
+
+        |\gray{ex <}| intros.
+        |\gray{1 subgoal}|
+
+          |\gray{H : 1 = 2 -> 2 = 1}|
+          |\gray{H0 : 2 = 1 -> 1 = 2}|
+          |\gray{============================}|
+           |\gray{1 = 2}|
+      \end{lstlisting}
+    \end{example}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+    \begin{example}[At the Coq Top-Level]
+      \begin{lstlisting}[gobble=8,escapechar=|]
+          |\gray{H : 1 = 2 -> 2 = 1}|
+          |\gray{H0 : 2 = 1 -> 1 = 2}|
+          |\gray{============================}|
+           |\gray{1 = 2}|
+
+        |\gray{ex <}| apply H.
+        |\gray{Toplevel input, characters 6-7:}|
+        |\gray{> apply H.}|
+        |\gray{>}|      |\gray{\^{}}|
+        |\gray{Error: Impossible to unify "2 = 1" with "1 = 2".}|
+      \end{lstlisting}
+    \end{example}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+    \begin{example}[At the Coq Top-Level]
+      \begin{lstlisting}[gobble=8,escapechar=|]
+        |\gray{ex <}| apply H0.
+        |\gray{1 subgoal}|
+
+          |\gray{H : 1 = 2 -> 2 = 1}|
+          |\gray{H0 : 2 = 1 -> 1 = 2}|
+          |\gray{============================}|
+           |\gray{2 = 1}|
+
+        |\gray{ex <}|
+      \end{lstlisting}
+    \end{example}
+  \end{onlyenv}
 \end{frame}
 
 \end{document}
