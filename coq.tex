@@ -201,4 +201,44 @@
   \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]{Equality}
+  \begin{definition}
+    \begin{lstlisting}[gobble=6]
+      Inductive eq (A:Type) (x:A) : A -> Prop :=
+        eq_refl : eq A x x.
+    \end{lstlisting}
+  \end{definition}
+  \begin{itemize}
+    \item \lstinline|eq_refl| is a \alert{constructor} of a proposition
+    \begin{itemize}
+      \item Given evidence that \lstinline|eq A x x|, \ldots
+      \item \ldots \lstinline|eq_refl| allows us to conclude the proposition is
+            true
+    \end{itemize}
+    \item \lstinline|eq_refl| ``is a proof of'' \lstinline|eq A x x|
+    \item It's the \alert{only} way to prove something of type
+          \lstinline|eq|---thus, this defines the smallest reflexive relation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How Does That Help?}
+  As it turns out, Coq tricks us a little\ldots
+  \begin{block}{}
+    \begin{lstlisting}[gobble=6,escapechar=|]
+      |\gray{Coq <}| Set Printing All.
+
+      |\gray{Coq <}| Print two_and_two_make_four.
+      two_and_two_make_four =
+      @eq_refl nat (S (S (S (S O))))
+           : @eq nat (plus (S (S O)) (S (S O)))
+                     (S (S (S (S O))))
+    \end{lstlisting}
+  \end{block}
+  \begin{alertblock}{Note}
+    The \lstinline|@|-sign has to do with making implicit arguments explicit
+    for a particular function application (\lstinline|2 + 2 = 4| leaves the
+    type \lstinline|nat| implicit)
+  \end{alertblock}
+\end{frame}
+
 \end{document}
