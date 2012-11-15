@@ -1,0 +1,67 @@
+\documentclass{beamer}
+
+\usetheme{CambridgeUS}
+
+\setbeamertemplate{theorems}[normal font]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{listings,lstlangcoq,bold-extra}
+\lstset{basicstyle=\ttfamily,language=Coq}
+
+\usepackage{graphics}
+
+\title{What's in a Proof?}
+\author{Alex Vondrak}
+\institute{Cal Poly Pomona}
+\titlegraphic{\includegraphics[height=3cm]{four-lights.jpg}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{An Anecdote}
+  % Classmates: whinge about proving things in such minute detail that you'd
+  % even need to prove (something like) 2 + 2 = 4.
+  % Dr. Rich's reaction: "um, no".
+  \begin{center}
+    \includegraphics[width=10cm]{math-is-hard.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{The Reason}
+  \begin{block}{}
+    \begin{lstlisting}[language={},gobble=6]
+      Theorem a: 2 + 2 = 4.
+    \end{lstlisting}
+  \end{block}
+  \begin{block}{}<2>
+    \begin{lstlisting}[language={},gobble=6]
+      Proof.
+        trivial.
+      Qed.
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Coq}
+  \begin{center}
+    \includegraphics[scale=0.4]{coq.png}
+  \end{center}
+  \begin{itemize}
+    \item An \alert{interactive theorem prover} started in 1984
+    \item Provides a formal language and environment for mathematical
+          definitions, algorithms, theorems, and machine-checked proofs
+    \item Language based on a derivative of the \alert{calculus of
+          constructions} (\alert{CoC})
+  \end{itemize}
+  \begin{example}
+    \begin{lstlisting}[gobble=6,escapechar=|]
+      Theorem two_and_two_make_four: 2 + 2 = 4.
+      Proof.
+        |\alt<2>{\alert{auto 1.}}{trivial.}|
+      Qed.
+    \end{lstlisting}
+  \end{example}
+\end{frame}
+
+\end{document}
