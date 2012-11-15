@@ -12,7 +12,7 @@
 \newcommand{\gray}[1]{\textcolor{gray}{#1}}
 
 \usepackage{listings,lstlangcoq,bold-extra}
-\lstset{basicstyle=\ttfamily,language=Coq}
+\lstset{basicstyle=\ttfamily,language=Coq,showstringspaces=false}
 
 \usepackage{graphics}
 
@@ -239,6 +239,27 @@
     for a particular function application (\lstinline|2 + 2 = 4| leaves the
     type \lstinline|nat| implicit)
   \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{Peano Arithmetic}
+  \begin{definition}
+    \begin{lstlisting}[gobble=6]
+      Inductive nat : Set :=
+        | O : nat
+        | S : nat -> nat.
+    \end{lstlisting}
+  \end{definition}
+  \begin{definition}
+    \begin{lstlisting}[gobble=6]
+      Fixpoint plus (n m:nat) : nat :=
+        match n with
+        | O => m
+        | S p => S (p + m)
+        end
+
+      where "n + m" := (plus n m) : nat_scope.
+    \end{lstlisting}
+  \end{definition}
 \end{frame}
 
 \end{document}
