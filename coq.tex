@@ -5,6 +5,11 @@
 \setbeamertemplate{theorems}[normal font]
 \setbeamertemplate{navigation symbols}{}
 
+\newcommand{\exampletext}[1]{%
+  \begin{beamercolorbox}{block title example}#1\end{beamercolorbox}%
+}
+\renewcommand<>{\fbox}[1]{\alt#2{\beameroriginal{\fbox}{#1}}{#1}}
+
 \usepackage{listings,lstlangcoq,bold-extra}
 \lstset{basicstyle=\ttfamily,language=Coq}
 
@@ -62,6 +67,27 @@
       Qed.
     \end{lstlisting}
   \end{example}
+\end{frame}
+
+\begin{frame}[fragile]{Proof Automation}
+  \begin{block}{Rough Algorithm}
+    \begin{lstlisting}[language={},
+                       morekeywords={if,then,foreach,in,try},
+                       mathescape=true,
+                       escapechar=|,
+                       gobble=6]
+      auto n =
+        if |\normalfont no more subgoals| then
+          |\exampletext{success}|
+        if n == 0 then
+          |\alert{failure}|
+        foreach |\normalfont term| in |\fbox{$hypotheses \cup hints$}|:
+          try
+            |\fbox{apply \text{\normalfont term}.}|
+            foreach |\text{\normalfont subgoal generated}|:
+              auto (n - 1) |\normalfont on that subgoal|
+    \end{lstlisting}
+  \end{block}
 \end{frame}
 
 \end{document}
