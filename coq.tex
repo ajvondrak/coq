@@ -262,4 +262,229 @@
   \end{definition}
 \end{frame}
 
+\begin{frame}[fragile]{Predicative Calculus of (Co)Inductive Constructions}
+  \begin{alertblock}{Problem}
+    How can we \lstinline|apply eq_refl.| to
+    \begin{lstlisting}[gobble=6]
+      @eq nat (plus (S (S O)) (S (S O)))
+              (S (S (S (S O))))
+    \end{lstlisting}
+    when we need evidence of the form \lstinline|eq A x x|?
+  \end{alertblock}
+  \begin{exampleblock}{Answer}
+    The underlying formal language of Coq defines semantics for definitions,
+    types, and (moreover) \alert{evaluation}:
+    \begin{itemize}
+      \item $\delta$-reduction
+      \item $\iota$-reduction
+      \item $\beta$-reduction
+      \item $\zeta$-reduction (similar to $\delta$)
+    \end{itemize}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{$\delta$-Reduction}
+  Replaces definition names with their values
+  \begin{example}
+    \begin{lstlisting}[gobble=6,escapechar=$]
+      @eq nat (plus (S (S O)) (S (S O)))
+              (S (S (S (S O))))
+
+      $\gray{Coq <}$ cbv delta.
+
+      @eq nat
+          ($\alert{(}$fix plus (n m : nat) : nat :=
+              match n return nat with
+              | O => m
+              | S p => S (plus p m)
+              end$\alert{)}$ (S (S O)) (S (S O)))
+          (S (S (S (S O))))
+    \end{lstlisting}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile]{$\iota$-Reduction}
+  A specific conversion rule; for our purposes, expands \lstinline|Fixpoint|
+  definitions
+  \begin{example}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat ($\alert{(}$fix plus (n m : nat) : nat :=
+                    match n return nat with
+                    | O => m
+                    | S p => S (plus p m)
+                    end$\alert{)}$ (S (S O)) (S (S O)))
+                (S (S (S (S O))))
+
+        $\gray{Coq <}$ cbv iota.
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat ($\alert{(}$fun n m : nat =>
+                  match n return nat with
+                  | O => m
+                  | S p =>
+                      S ($\alert{(}$fix plus (n0 m0 : nat) : nat :=
+                            match n0 return nat with
+                            | O => m0
+                            | S p0 => S (plus p0 m0)
+                            end$\alert{)}$ p m)
+                  end$\alert{)}$ (S (S O)) (S (S O)))
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile]{$\beta$-Reduction}
+  Applies \lstinline|fun|ctions to their arguments
+  \begin{example}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat ($\alert{(}$fun n m : nat =>
+                  match n return nat with
+                  | O => m
+                  | S p =>
+                      S ($\alert{(}$fix plus (n0 m0 : nat) : nat :=
+                            match n0 return nat with
+                            | O => m0
+                            | S p0 => S (plus p0 m0)
+                            end$\alert{)}$ p m)
+                  end$\alert{)}$ (S (S O)) (S (S O)))
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        $\gray{Coq <}$ cbv beta.
+
+        @eq nat (match $\alert{S (S O)}$ return nat with
+                | O => $\alert{S (S O)}$
+                | S p =>
+                    S ((fix plus (n m : nat) : nat :=
+                          match n return nat with
+                          | O => m
+                          | S p0 => S (plus p0 m)
+                          end) p $\alert{(S (S O))}$)
+                end)
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile,t]{$\iota$-Reduction}
+  Here, $\iota$ resolves the \lstinline|match|
+  \begin{example}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat (match $\alert{S (S O)}$ return nat with
+                | O => $\alert{S (S O)}$
+                | S p =>
+                    S ((fix plus (n m : nat) : nat :=
+                          match n return nat with
+                          | O => m
+                          | S p0 => S (plus p0 m)
+                          end) p $\alert{(S (S O))}$)
+                end)
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        $\gray{Coq <}$ cbv iota.
+
+        @eq nat ($\alert{(}$fun p : nat =>
+                   S ($\alert{(}$fix plus (n m : nat) : nat :=
+                        match n return nat with
+                        | O => m
+                        | S p0 => S (plus p0 m)
+                        end$\alert{)}$ p (S (S O)))$\alert{)}$ $\alert{(S O)}$)
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile,t]{$\beta$-Reduction}
+  And $\beta$ once again applies the \lstinline|fun|ction\ldots
+  \begin{example}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat ($\alert{(}$fun p : nat =>
+                   S ($\alert{(}$fix plus (n m : nat) : nat :=
+                        match n return nat with
+                        | O => m
+                        | S p0 => S (plus p0 m)
+                        end$\alert{)}$ p (S (S O)))$\alert{)}$ $\alert{(S O)}$)
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        $\gray{Coq <}$ cbv beta.
+
+        @eq nat (S ($\alert{(}$fix plus (n m : nat) : nat :=
+                      match n return nat with
+                      | O => m
+                      | S p => S (plus p m)
+                      end$\alert{)}$ (S O) (S (S O))))
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile,t]{Eventually\ldots}
+  $\iota$ resolves yet another \lstinline|match|
+  \begin{example}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        @eq nat (S (S (match $\alert{O}$ return nat with
+                       | $\alert{O}$ => S (S O)
+                       | S p =>
+                         S ((fix plus (n m : nat) : nat :=
+                              match n return nat with
+                              | O => m
+                              | S p0 => S (plus p0 m)
+                              end) p (S (S O)))
+                       end)))
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[gobble=8,escapechar=$]
+        $\gray{Coq <}$ cbv iota.
+
+        @eq nat (S (S (S (S O))))
+                (S (S (S (S O))))
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{example}
+\end{frame}
+
+\begin{frame}[fragile]{Finally}
+  So, what we really mean by
+  \begin{lstlisting}[gobble=4,frame=single]
+    Theorem two_and_two_make_four: 2 + 2 = 4.
+    Proof. trivial. Qed.
+  \end{lstlisting}
+  is
+  \begin{lstlisting}[gobble=4,frame=single]
+    Theorem there_are_four_lights: 2 + 2 = 4.
+    Proof.
+      cbv delta.
+      cbv iota. cbv beta. cbv iota. cbv beta.
+      cbv iota. cbv beta. cbv iota. cbv beta.
+      cbv iota. cbv beta. cbv iota.
+      apply eq_refl.
+    Qed.
+  \end{lstlisting}
+  none of which is really necessary!
+\end{frame}
+
+%\begin{frame}{Curry-Howard Correspondence}
+%\end{frame}
+
 \end{document}
