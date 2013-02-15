@@ -9,7 +9,7 @@
   \begin{beamercolorbox}{block title example}#1\end{beamercolorbox}%
 }
 \renewcommand<>{\fbox}[1]{\alt#2{\beameroriginal{\fbox}{#1}}{#1}}
-\newcommand{\gray}[1]{\textcolor{gray}{#1}}
+\newcommand{\gray}[1]{\textcolor{darkgray}{#1}}
 
 \usepackage{listings,lstlangcoq,bold-extra}
 \lstset{basicstyle=\ttfamily,language=Coq,showstringspaces=false}
@@ -303,7 +303,7 @@
   \end{example}
 \end{frame}
 
-\begin{frame}[fragile]{$\iota$-Reduction}
+\begin{frame}[fragile,t]{$\iota$-Reduction}
   A specific conversion rule; for our purposes, expands \lstinline|Fixpoint|
   definitions
   \begin{example}
