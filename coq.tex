@@ -93,9 +93,8 @@
 
 \begin{frame}[fragile,t]{\texttt{apply} term\texttt{.}}
   \begin{itemize}
-    \item Tries to \alert{unify} the goal with the conclusion of the
-          \alert{type} of ``term''
-    \item Returns \alert{subgoals}---premises of the type of ``term''
+    \item Tries to \alert{unify} the goal with the conclusion of ``term''
+    \item Returns \alert{subgoals}---premises of ``term''
   \end{itemize}
   \begin{onlyenv}<1>
     \begin{example}[At the Coq Top-Level]
@@ -202,7 +201,13 @@
 \end{frame}
 
 \begin{frame}[fragile]{Equality}
-  \begin{definition}
+  \begin{alertblock}{Definition (Pseudo)}
+    \begin{lstlisting}[gobble=6]
+      Inductive eq (A:Type) (x:A) (y:A) : Prop :=
+        eq_refl : eq A x x.
+    \end{lstlisting}
+  \end{alertblock}
+  \begin{definition}[Actual]
     \begin{lstlisting}[gobble=6]
       Inductive eq (A:Type) (x:A) : A -> Prop :=
         eq_refl : eq A x x.
@@ -217,7 +222,7 @@
     \end{itemize}
     \item \lstinline|eq_refl| ``is a proof of'' \lstinline|eq A x x|
     \item It's the \alert{only} way to prove something of type
-          \lstinline|eq|---thus, this defines the smallest reflexive relation
+          \lstinline|eq|
   \end{itemize}
 \end{frame}
 
@@ -484,23 +489,20 @@
   none of which is really necessary!
 \end{frame}
 
-\begin{frame}{Curry-Howard Correspondence}
+\begin{frame}{Curry-Howard Isomorphism}
   \begin{block}{In A Nutshell}
     \begin{align*}
-      \text{propositions} &\quad\equiv\quad \text{types} \\
-      \text{proofs}       &\quad\equiv\quad \text{programs}
+      \text{proofs}       &\quad\equiv\quad \text{programs} \\
+      \text{propositions} &\quad\equiv\quad \text{types}
     \end{align*}
     (Coq can even export proofs as programs in other languages!)
   \end{block}
-  Strong future in automating proofs:
+  Less about automated proofs, more about \alert{computer-assisted proofs}
   \begin{itemize}
-    \item Not just results that humans can't achieve on their own
-    \begin{itemize}
-      \item Though this \alert{has} happened (e.g., Robbins' conjecture)
-      \item Ask a math student about this sometime!
-    \end{itemize}
-    \item End of the day: proof \alert{assistants} (e.g., 4-color theorem,
-    Compcert)
+    \item To brute-force part of a solution: The Four Color Theorem
+    \item To prove something deemed interesting: Robbins' Conjecture
+    \item To better understand existing proofs: The Odd Order Theorem
+    \item To rigorously validate software: CompCert
   \end{itemize}
 \end{frame}
 
